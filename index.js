@@ -42,7 +42,7 @@ const upload = multer({ storage: storage });
 app.use('/api/images', imageRoutes);
 
 // Example of a file upload route
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post('/upload', upload.array('images[]'), (req, res) => {
   if (!req.file) {
     return res.status(400).send({ message: 'No file uploaded' });
   }
