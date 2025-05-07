@@ -2,10 +2,11 @@
   "name": "wedding-card-backend",
   "version": "1.0.0",
   "description": "Backend for Wedding Card Application",
-  "main": "server.js",
+  "main": "index.js",
+  "type": "module",  // Add this line
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -13,7 +14,8 @@
     "mongoose": "^7.0.0",
     "dotenv": "^16.0.0",
     "cors": "^2.8.5",
-    "nodemon": "^2.0.19"
+    "nodemon": "^2.0.19",
+    "multer": "^1.4.4"  // Ensure this is installed
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
