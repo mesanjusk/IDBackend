@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Backend for Wedding Card Application",
   "main": "index.js",
-  "type": "module",  // Add this line
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
@@ -15,7 +15,7 @@
     "dotenv": "^16.0.0",
     "cors": "^2.8.5",
     "nodemon": "^2.0.19",
-    "multer": "^1.4.4"  // Ensure this is installed
+    "multer": "^1.4.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
