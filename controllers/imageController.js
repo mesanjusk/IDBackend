@@ -1,4 +1,4 @@
-import Image from '../models/imageModel.js';
+import Image from '../models/Image.js';
 
 export const saveImageMetadata = async (req, res) => {
   try {
