@@ -19,8 +19,8 @@ const upload = multer({ storage });
 
 // Upload image
 router.post('/', upload.single('image'), async (req, res) => {
-  const { path, filename } = req.file;
-  const newImage = new Image({ url: path, public_id: filename });
+  const { path, filename, title } = req.file;
+  const newImage = new Image({ url: path, public_id: filename, title });
   await newImage.save();
   res.status(201).json(newImage);
 });
