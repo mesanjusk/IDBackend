@@ -1,22 +1,34 @@
+// server/routes/imageRoutes.js
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
-import { saveImageMetadata } from '../controllers/imageController.js';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../utils/cloudinary.js';
+import Image from '../models/Image.js';
 
 const router = express.Router();
 
-// Configure multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Make sure this folder exists
+// Cloudinary storage setup
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'mern-images',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  }
 });
-
 const upload = multer({ storage });
 
-router.post('/', upload.single('image'), saveImageMetadata);
+// Upload image
+router.post('/', upload.single('image'), async (req, res) => {
+  const { path, filename, title } = req.file;
+  const newImage = new Image({ url: path, public_id: filename, title });
+  await newImage.save();
+  res.status(201).json(newImage);
+});
+
+// Get all images
+router.get('/', async (req, res) => {
+  const images = await Image.find().sort({ _id: -1 });
+  res.json(images);
+});
 
 export default router;
