@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Your provided MongoDB URI
-const MONGO_URI = 'mongodb+srv://sanjuahuja:cY7NtMKm8M10MbUs@cluster0.wdfsd.mongodb.net/SkCards';
+const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
   console.error("MONGO_URI environment variable not set.");
