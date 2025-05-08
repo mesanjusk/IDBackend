@@ -18,15 +18,26 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // Upload image
-router.post('/', upload.single('image'), async (req, res) => {
-  const { title } = req.body;
-  const { path, url, filename, public_id } = req.file;
+// Upload multiple images
+router.post('/', upload.array('images[]'), async (req, res) => {
+  try {
+    const { title } = req.body;
+    const images = req.files.map(file => {
+      const { path, url, filename, public_id } = file;
+      return {
+        title,
+        url: url || path,
+        public_id: public_id || filename,
+      };
+    });
 
-  const newImage = new Image({
-    title,
-    url: url || path,
-    public_id: public_id || filename,
-  });
+    await Image.insertMany(images); // Save multiple images at once
+    res.status(201).json(images);
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ message: 'Failed to upload images' });
+  }
+});
 
   await newImage.save();
   res.status(201).json(newImage);
