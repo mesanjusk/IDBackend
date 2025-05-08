@@ -1,161 +1,63 @@
-import { useState } from 'react';
-import axios from 'axios';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import imageRoutes from './routes/imageRoutes.js';
+import path from 'path';
+import multer from 'multer';
 
-export default function Upload() {
-const \[file, setFile] = useState(null);
-const \[title, setTitle] = useState('');
-const \[category, setCategory] = useState('');
-const \[subcategory, setSubcategory] = useState('');
-const \[price, setPrice] = useState('');
-const \[instagramUrl, setInstagramUrl] = useState('');
-const \[size, setSize] = useState('');
-const \[religions, setReligions] = useState('');
-const \[seoTitle, setSeoTitle] = useState(''); // SEO Title
-const \[seoDescription, setSeoDescription] = useState(''); // SEO Description
-const \[seoKeywords, setSeoKeywords] = useState(''); // SEO Keywords
-const \[loading, setLoading] = useState(false);
-const \[error, setError] = useState('');
-const \[success, setSuccess] = useState('');
+dotenv.config();
 
-const handleUpload = async () => {
-if (!file) return alert('Please select a file');
-setLoading(true);
-setError('');
-setSuccess('');
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-```
-const formData = new FormData();
-formData.append('image', file);
-formData.append('title', title);
-formData.append('category', category);
-formData.append('subcategory', subcategory);
-formData.append('price', price);
-formData.append('instagramUrl', instagramUrl);
-formData.append('size', size);
-formData.append('religions', religions);
-formData.append('seoTitle', seoTitle); // Add SEO Title
-formData.append('seoDescription', seoDescription); // Add SEO Description
-formData.append('seoKeywords', seoKeywords); // Add SEO Keywords
+// Your provided MongoDB URI
+const MONGO_URI = process.env.MONGO_URI;
 
-try {
-  const res = await axios.post('https://idbackend-rf1u.onrender.com/api/images', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+if (!MONGO_URI) {
+  console.error("MONGO_URI environment variable not set.");
+  process.exit(1);
+}
+
+// Set up CORS, JSON parsing
+app.use(cors());
+app.use(express.json());
+
+// Set up static file serving
+app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
+
+// Set up Multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');  // specify the folder where files will be saved
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);  // generate a unique filename
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Use the imageRoutes for your image upload logic
+app.use('/api/images', imageRoutes);
+
+// Example of a file upload route
+app.post('/upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ message: 'No file uploaded' });
+  }
+
+  // File uploaded successfully, you can now handle the uploaded file
+  res.status(200).send({ message: 'File uploaded successfully', file: req.file });
+});
+
+// Connect to MongoDB and start the server
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("✅ Connected to MongoDB");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
   });
-
-  setSuccess('Uploaded successfully!');
-  setFile(null);
-  setTitle('');
-  setCategory('');
-  setSubcategory('');
-  setPrice('');
-  setInstagramUrl('');
-  setSize('');
-  setReligions('');
-  setSeoTitle(''); // Clear SEO fields after success
-  setSeoDescription('');
-  setSeoKeywords('');
-} catch (err) {
-  setError('Upload failed, please try again.');
-  console.error('Upload failed:', err.response?.data || err.message);
-} finally {
-  setLoading(false);
-}
-```
-
-};
-
-return ( <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6"> <h1 className="text-3xl font-bold text-gray-800 mb-6">Upload Design </h1> <div className="flex flex-col space-y-4 w-full max-w-md">
-\<input
-type="text"
-placeholder="Title"
-value={title}
-onChange={(e) => setTitle(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="file"
-onChange={(e) => setFile(e.target.files\[0])}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="text"
-placeholder="Category"
-value={category}
-onChange={(e) => setCategory(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="text"
-placeholder="Subcategory"
-value={subcategory}
-onChange={(e) => setSubcategory(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="number"
-placeholder="Price"
-value={price}
-onChange={(e) => setPrice(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="url"
-placeholder="Instagram URL"
-value={instagramUrl}
-onChange={(e) => setInstagramUrl(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="text"
-placeholder="Size"
-value={size}
-onChange={(e) => setSize(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-\<input
-type="text"
-placeholder="Religions"
-value={religions}
-onChange={(e) => setReligions(e.target.value)}
-className="px-4 py-2 border rounded-md"
-/>
-
-```
-    {/* SEO Fields */}
-    <input
-      type="text"
-      placeholder="SEO Title"
-      value={seoTitle}
-      onChange={(e) => setSeoTitle(e.target.value)}
-      className="px-4 py-2 border rounded-md"
-    />
-    <textarea
-      placeholder="SEO Description"
-      value={seoDescription}
-      onChange={(e) => setSeoDescription(e.target.value)}
-      className="px-4 py-2 border rounded-md"
-    />
-    <input
-      type="text"
-      placeholder="SEO Keywords"
-      value={seoKeywords}
-      onChange={(e) => setSeoKeywords(e.target.value)}
-      className="px-4 py-2 border rounded-md"
-    />
-
-    {error && <p className="text-red-500 text-sm">{error}</p>}
-    {success && <p className="text-green-500 text-sm">{success}</p>}
-
-    <button
-      onClick={handleUpload}
-      className={`bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-      disabled={loading}
-    >
-      {loading ? 'Uploading...' : 'Upload'}
-    </button>
-  </div>
-</div>
-```
-
-);
-}
