@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import imageRoutes from './routes/imageRoutes.js';
 import path from 'path';
 import multer from 'multer';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -24,12 +25,16 @@ app.use(cors());
 app.use(express.json());
 
 // Set up static file serving
-app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
+const uploadsDir = path.join(path.resolve(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);  // Create the uploads directory if it doesn't exist
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // Set up Multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');  // specify the folder where files will be saved
+    cb(null, uploadsDir);  // specify the folder where files will be saved
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname);  // generate a unique filename
@@ -41,14 +46,19 @@ const upload = multer({ storage: storage });
 // Use the imageRoutes for your image upload logic
 app.use('/api/images', imageRoutes);
 
-// Example of a file upload route
+// Example of a file upload route (single or multiple files based on the use case)
 app.post('/upload', upload.array('images[]'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send({ message: 'No file uploaded' });
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send({ message: 'No files uploaded' });
   }
 
-  // File uploaded successfully, you can now handle the uploaded file
-  res.status(200).send({ message: 'File uploaded successfully', file: req.file });
+  // Files uploaded successfully, handle the uploaded files here
+  const uploadedFiles = req.files.map(file => file.filename);  // Store filenames if needed
+
+  res.status(200).send({
+    message: 'Files uploaded successfully',
+    files: uploadedFiles,
+  });
 });
 
 // Connect to MongoDB and start the server
