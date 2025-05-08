@@ -16,38 +16,37 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage });
 
-// Upload image route
+// Upload image to Cloudinary and save metadata to MongoDB
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const { title } = req.body;
-    const { url, public_id } = req.file;
-
-    if (!url || !public_id) {
-      return res.status(400).json({ message: 'Cloudinary upload failed.' });
-    }
+    const { title, category, instaUrl } = req.body;
+    const { path, url, filename, public_id } = req.file;
 
     const newImage = new Image({
       title,
-      url,
-      public_id,
+      url: url || path,  // Cloudinary URL or local path
+      public_id: public_id || filename,  // Cloudinary public_id or local filename
+      category,
+      instaUrl,
     });
 
     await newImage.save();
+
     res.status(201).json(newImage);
   } catch (error) {
-    console.error('Upload Error:', error);
-    res.status(500).json({ message: 'Server error while uploading', error });
+    console.error('Error uploading image:', error);
+    res.status(500).json({ message: 'Server error while uploading image', error: error.message });
   }
 });
 
-// Get all images
+// Get all images from database
 router.get('/', async (req, res) => {
   try {
     const images = await Image.find().sort({ _id: -1 });
     res.json(images);
   } catch (error) {
     console.error('Error fetching images:', error);
-    res.status(500).json({ message: 'Failed to fetch images', error });
+    res.status(500).json({ message: 'Server error while fetching images', error: error.message });
   }
 });
 
