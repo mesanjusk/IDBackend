@@ -1,53 +1,161 @@
-import express from 'express';
-import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../utils/cloudinary.js';
-import Image from '../models/Image.js';
+import { useState } from 'react';
+import axios from 'axios';
 
-const router = express.Router();
+export default function Upload() {
+const \[file, setFile] = useState(null);
+const \[title, setTitle] = useState('');
+const \[category, setCategory] = useState('');
+const \[subcategory, setSubcategory] = useState('');
+const \[price, setPrice] = useState('');
+const \[instagramUrl, setInstagramUrl] = useState('');
+const \[size, setSize] = useState('');
+const \[religions, setReligions] = useState('');
+const \[seoTitle, setSeoTitle] = useState(''); // SEO Title
+const \[seoDescription, setSeoDescription] = useState(''); // SEO Description
+const \[seoKeywords, setSeoKeywords] = useState(''); // SEO Keywords
+const \[loading, setLoading] = useState(false);
+const \[error, setError] = useState('');
+const \[success, setSuccess] = useState('');
 
-// Cloudinary storage setup
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'mern-images',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-  },
-});
-const upload = multer({ storage });
+const handleUpload = async () => {
+if (!file) return alert('Please select a file');
+setLoading(true);
+setError('');
+setSuccess('');
 
-// Upload image to Cloudinary and save metadata to MongoDB
-router.post('/', upload.single('image'), async (req, res) => {
-  try {
-    const { title, category, instaUrl } = req.body;
-    const { path, url, filename, public_id } = req.file;
+```
+const formData = new FormData();
+formData.append('image', file);
+formData.append('title', title);
+formData.append('category', category);
+formData.append('subcategory', subcategory);
+formData.append('price', price);
+formData.append('instagramUrl', instagramUrl);
+formData.append('size', size);
+formData.append('religions', religions);
+formData.append('seoTitle', seoTitle); // Add SEO Title
+formData.append('seoDescription', seoDescription); // Add SEO Description
+formData.append('seoKeywords', seoKeywords); // Add SEO Keywords
 
-    const newImage = new Image({
-      title,
-      url: url || path,  // Cloudinary URL or local path
-      public_id: public_id || filename,  // Cloudinary public_id or local filename
-      category,
-      instaUrl,
-    });
+try {
+  const res = await axios.post('https://idbackend-rf1u.onrender.com/api/images', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 
-    await newImage.save();
+  setSuccess('Uploaded successfully!');
+  setFile(null);
+  setTitle('');
+  setCategory('');
+  setSubcategory('');
+  setPrice('');
+  setInstagramUrl('');
+  setSize('');
+  setReligions('');
+  setSeoTitle(''); // Clear SEO fields after success
+  setSeoDescription('');
+  setSeoKeywords('');
+} catch (err) {
+  setError('Upload failed, please try again.');
+  console.error('Upload failed:', err.response?.data || err.message);
+} finally {
+  setLoading(false);
+}
+```
 
-    res.status(201).json(newImage);
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    res.status(500).json({ message: 'Server error while uploading image', error: error.message });
-  }
-});
+};
 
-// Get all images from database
-router.get('/', async (req, res) => {
-  try {
-    const images = await Image.find().sort({ _id: -1 });
-    res.json(images);
-  } catch (error) {
-    console.error('Error fetching images:', error);
-    res.status(500).json({ message: 'Server error while fetching images', error: error.message });
-  }
-});
+return ( <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6"> <h1 className="text-3xl font-bold text-gray-800 mb-6">Upload Design </h1> <div className="flex flex-col space-y-4 w-full max-w-md">
+\<input
+type="text"
+placeholder="Title"
+value={title}
+onChange={(e) => setTitle(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="file"
+onChange={(e) => setFile(e.target.files\[0])}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="text"
+placeholder="Category"
+value={category}
+onChange={(e) => setCategory(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="text"
+placeholder="Subcategory"
+value={subcategory}
+onChange={(e) => setSubcategory(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="number"
+placeholder="Price"
+value={price}
+onChange={(e) => setPrice(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="url"
+placeholder="Instagram URL"
+value={instagramUrl}
+onChange={(e) => setInstagramUrl(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="text"
+placeholder="Size"
+value={size}
+onChange={(e) => setSize(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
+\<input
+type="text"
+placeholder="Religions"
+value={religions}
+onChange={(e) => setReligions(e.target.value)}
+className="px-4 py-2 border rounded-md"
+/>
 
-export default router;
+```
+    {/* SEO Fields */}
+    <input
+      type="text"
+      placeholder="SEO Title"
+      value={seoTitle}
+      onChange={(e) => setSeoTitle(e.target.value)}
+      className="px-4 py-2 border rounded-md"
+    />
+    <textarea
+      placeholder="SEO Description"
+      value={seoDescription}
+      onChange={(e) => setSeoDescription(e.target.value)}
+      className="px-4 py-2 border rounded-md"
+    />
+    <input
+      type="text"
+      placeholder="SEO Keywords"
+      value={seoKeywords}
+      onChange={(e) => setSeoKeywords(e.target.value)}
+      className="px-4 py-2 border rounded-md"
+    />
+
+    {error && <p className="text-red-500 text-sm">{error}</p>}
+    {success && <p className="text-green-500 text-sm">{success}</p>}
+
+    <button
+      onClick={handleUpload}
+      className={`bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      disabled={loading}
+    >
+      {loading ? 'Uploading...' : 'Upload'}
+    </button>
+  </div>
+</div>
+```
+
+);
+}
