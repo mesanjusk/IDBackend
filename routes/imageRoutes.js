@@ -1,4 +1,3 @@
-// server/routes/imageRoutes.js
 import express from 'express';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -17,36 +16,39 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage });
 
-// Upload image
-// Upload multiple images
-router.post('/', upload.array('images[]'), async (req, res) => {
+// Upload image route
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { title } = req.body;
-    const images = req.files.map(file => {
-      const { path, url, filename, public_id } = file;
-      return {
-        title,
-        url: url || path,
-        public_id: public_id || filename,
-      };
+    const { url, public_id } = req.file;
+
+    if (!url || !public_id) {
+      return res.status(400).json({ message: 'Cloudinary upload failed.' });
+    }
+
+    const newImage = new Image({
+      title,
+      url,
+      public_id,
     });
 
-    await Image.insertMany(images); // Save multiple images at once
-    res.status(201).json(images);
-  } catch (err) {
-    console.error('Upload error:', err);
-    res.status(500).json({ message: 'Failed to upload images' });
+    await newImage.save();
+    res.status(201).json(newImage);
+  } catch (error) {
+    console.error('Upload Error:', error);
+    res.status(500).json({ message: 'Server error while uploading', error });
   }
-});
-
-  await newImage.save();
-  res.status(201).json(newImage);
 });
 
 // Get all images
 router.get('/', async (req, res) => {
-  const images = await Image.find().sort({ _id: -1 });
-  res.json(images);
+  try {
+    const images = await Image.find().sort({ _id: -1 });
+    res.json(images);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    res.status(500).json({ message: 'Failed to fetch images', error });
+  }
 });
 
 export default router;
