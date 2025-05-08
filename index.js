@@ -1,73 +1,53 @@
 import express from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import imageRoutes from './routes/imageRoutes.js';
-import path from 'path';
 import multer from 'multer';
-import fs from 'fs';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../utils/cloudinary.js';
+import Image from '../models/Image.js';
 
-dotenv.config();
+const router = express.Router();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Your provided MongoDB URI
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-  console.error("MONGO_URI environment variable not set.");
-  process.exit(1);
-}
-
-// Set up CORS, JSON parsing
-app.use(cors());
-app.use(express.json());
-
-// Set up static file serving
-const uploadsDir = path.join(path.resolve(), 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);  // Create the uploads directory if it doesn't exist
-}
-app.use('/uploads', express.static(uploadsDir));
-
-// Set up Multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);  // specify the folder where files will be saved
+// Cloudinary storage setup
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'mern-images',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);  // generate a unique filename
+});
+const upload = multer({ storage });
+
+// Upload image to Cloudinary and save metadata to MongoDB
+router.post('/', upload.single('image'), async (req, res) => {
+  try {
+    const { title, category, instaUrl } = req.body;
+    const { path, url, filename, public_id } = req.file;
+
+    const newImage = new Image({
+      title,
+      url: url || path,  // Cloudinary URL or local path
+      public_id: public_id || filename,  // Cloudinary public_id or local filename
+      category,
+      instaUrl,
+    });
+
+    await newImage.save();
+
+    res.status(201).json(newImage);
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({ message: 'Server error while uploading image', error: error.message });
   }
 });
 
-const upload = multer({ storage: storage });
-
-// Use the imageRoutes for your image upload logic
-app.use('/api/images', imageRoutes);
-
-// Example of a file upload route (single or multiple files based on the use case)
-app.post('/upload', upload.array('images[]'), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).send({ message: 'No files uploaded' });
+// Get all images from database
+router.get('/', async (req, res) => {
+  try {
+    const images = await Image.find().sort({ _id: -1 });
+    res.json(images);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    res.status(500).json({ message: 'Server error while fetching images', error: error.message });
   }
-
-  // Files uploaded successfully, handle the uploaded files here
-  const uploadedFiles = req.files.map(file => file.filename);  // Store filenames if needed
-
-  res.status(200).send({
-    message: 'Files uploaded successfully',
-    files: uploadedFiles,
-  });
 });
 
-// Connect to MongoDB and start the server
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log("✅ Connected to MongoDB");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch(err => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
+export default router;
