@@ -1,14 +1,12 @@
 import mongoose from 'mongoose';
 
-// Define the schema for the image model
-const imageSchema = new mongoose.Schema(
-  {
-    url: { type: String, required: true }, // URL of the image
-    public_id: { type: String, required: true }, // Cloudinary public ID
-    title: { type: String, required: true }, // Title for the image
-  },
-  { timestamps: true } // Automatically manage createdAt and updatedAt
-);
+// MongoDB schema for images
+const imageSchema = new mongoose.Schema({
+  url: String,          // Image URL (from Cloudinary or local path)
+  public_id: String,    // Public ID (from Cloudinary or filename)
+  title: String,        // Image title
+  category: String,     // Image category
+  instaUrl: String,     // Instagram URL for reference (optional)
+});
 
-// Export the Image model based on the schema
 export default mongoose.model('Image', imageSchema);
