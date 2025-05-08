@@ -26,30 +26,8 @@ app.use(express.json());
 // Set up static file serving
 app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 
-// Set up Multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');  // specify the folder where files will be saved
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);  // generate a unique filename
-  }
-});
-
-const upload = multer({ storage: storage });
-
 // Use the imageRoutes for your image upload logic
 app.use('/api/images', imageRoutes);
-
-// Example of a file upload route
-app.post('/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send({ message: 'No file uploaded' });
-  }
-
-  // File uploaded successfully, you can now handle the uploaded file
-  res.status(200).send({ message: 'File uploaded successfully', file: req.file });
-});
 
 // Connect to MongoDB and start the server
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
