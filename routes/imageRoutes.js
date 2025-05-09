@@ -39,9 +39,9 @@ router.post('/',upload.single('image'), async (req, res) => {
       religions,
       seoTitle,
       seoDescription,
-      seoKeywords
-    url: url || path,
-    public_id: public_id || filename,
+      seoKeywords,
+      url: url || path,
+     public_id: public_id || filename,
   });
 
   await newImage.save();
