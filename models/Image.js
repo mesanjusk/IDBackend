@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const imageSchema = new mongoose.Schema({
   url: String,
-  public_id: String,,
+  public_id: String,
   title: String,
   category: String,
   subcategory: String,
