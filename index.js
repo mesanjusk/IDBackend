@@ -32,6 +32,11 @@ app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 app.use('/api/images', imageRoutes);
 app.use('/api/listings', listingRoutes);
 
+// ✅ Health check route here
+app.get('/api/ping', (req, res) => {
+  res.status(200).send('Backend is alive!');
+});
+
 // Connect to MongoDB and start the server
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
