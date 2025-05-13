@@ -1,5 +1,5 @@
 import express from 'express';
-import Instaurl from '../models/Instaurl.js';
+import Instaurl from '../models/InstaUrl.js';
 import { v4 as uuid } from "uuid";
 
 const router = express.Router();
