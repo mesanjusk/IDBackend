@@ -6,7 +6,11 @@ import path from 'path';
 
 import imageRoutes from './routes/imageRoutes.js';
 import listingRoutes from './routes/listing.js';
-import categoryRoutes from './routes/categoryRoutes.js'; // ✅ New import
+import categoryRoutes from './routes/categoryRoutes.js'; 
+import subcategoryRoutes from './routes/subcategoryRoutes.js';
+import titleRoutes from './routes/titleRoutes.js';
+import instaUrlRoutes from './routes/instaUrlRouter.js';
+import priceRoutes from './routes/priceRouter.js';
 
 dotenv.config();
 
@@ -30,7 +34,11 @@ app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 // ✅ API Routes
 app.use('/api/images', imageRoutes);
 app.use('/api/listings', listingRoutes);
-app.use('/api/categories', categoryRoutes); // ✅ Added category routes
+app.use('/api/categories', categoryRoutes); 
+app.use('/api/subcategories', subcategoryRoutes);
+app.use('/api/titles', titleRoutes);
+app.use('/api/instas', instaUrlRoutes);
+app.use('/api/prices', priceRoutes);
 
 // ✅ Health check
 app.get('/api/ping', (req, res) => {
