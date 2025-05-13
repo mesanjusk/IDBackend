@@ -3,7 +3,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import Subcategory from '../models/SUbcategory.js';
+import Subcategory from '../models/Subcategory.js';
 
 const router = express.Router();
 
