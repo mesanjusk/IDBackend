@@ -11,6 +11,7 @@ import subcategoryRoutes from './routes/subcategoryRoutes.js';
 import titleRoutes from './routes/titleRoutes.js';
 import instaUrlRoutes from './routes/instaUrlRouter.js';
 import priceRoutes from './routes/priceRouter.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/subcategories', subcategoryRoutes);
 app.use('/api/titles', titleRoutes);
 app.use('/api/instas', instaUrlRoutes);
 app.use('/api/prices', priceRoutes);
+app.use('/api/users', userRoutes);
 
 // ✅ Health check
 app.get('/api/ping', (req, res) => {
