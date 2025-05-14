@@ -12,6 +12,11 @@ import titleRoutes from './routes/titleRoutes.js';
 import instaUrlRoutes from './routes/instaUrlRouter.js';
 import priceRoutes from './routes/priceRouter.js';
 import userRoutes from './routes/userRoutes.js';
+import sizeRoutes from './routes/sizeRoutes.js';
+import religionRoutes from './routes/religionRoutes.js';
+import seotRoutes from './routes/seotitleRoutes.js';
+import seodRoutes from './routes/seodesRoutes.js';
+import seokRoutes from './routes/seokeywordRoutes.js';
 
 dotenv.config();
 
@@ -40,6 +45,11 @@ app.use('/api/subcategories', subcategoryRoutes);
 app.use('/api/titles', titleRoutes);
 app.use('/api/instas', instaUrlRoutes);
 app.use('/api/prices', priceRoutes);
+app.use('/api/sizes', sizeRoutes);
+app.use('/api/religions', religionRoutes);
+app.use('/api/seots', seotRoutes);
+app.use('/api/seods', seodRoutes);
+app.use('/api/seoks', seokRoutes);
 app.use('/api/users', userRoutes);
 
 // ✅ Health check

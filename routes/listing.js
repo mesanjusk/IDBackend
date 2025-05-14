@@ -17,7 +17,14 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 router.post('/', upload.array('images', 10), async (req, res) => {
+   console.log('Request Body:', req.body);
+    console.log('Uploaded Files:', req.files);
+
   try {
+      if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No images uploaded' });
+    }
+    console.log('Uploaded files:', req.files);
     const { title, category, subcategory, price, instagramUrl, size, religions, seoTitle, seoDescription, seoKeywords } = req.body;
 
     const imageUrls = req.files.map(file => file.path); 
