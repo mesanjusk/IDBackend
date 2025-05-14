@@ -1,27 +1,20 @@
 // routes/categoryRoutes.js
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../utils/cloudinary.js';
 import Category from '../models/Category.js';
 
 const router = express.Router();
 
-// Create uploads/categories if not exists
-const categoryDir = path.join(path.resolve(), 'uploads/categories');
-if (!fs.existsSync(categoryDir)) {
-  fs.mkdirSync(categoryDir, { recursive: true });
-}
-
-// Multer setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, categoryDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  },
+// Cloudinary Storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'categories',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    transformation: [{ width: 500, height: 500, crop: 'limit' }]
+  }
 });
 
 const upload = multer({ storage });
@@ -36,7 +29,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       return res.status(400).json({ message: 'Name and image are required.' });
     }
 
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/categories/${file.filename}`;
+    const imageUrl = file.path; // Cloudinary returns `path` as secure_url
 
     const category = new Category({ name, imageUrl });
     await category.save();
