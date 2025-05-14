@@ -1,27 +1,19 @@
-// routes/categoryRoutes.js
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../utils/cloudinary.js';
 import Subcategory from '../models/Subcategory.js';
 
 const router = express.Router();
 
-// Create uploads/subcategories if not exists
-const subcategoryDir = path.join(path.resolve(), 'uploads/subcategories');
-if (!fs.existsSync(subcategoryDir)) {
-  fs.mkdirSync(subcategoryDir, { recursive: true });
-}
-
-// Multer setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, subcategoryDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  },
+// Cloudinary Storage for multer (subcategory folder)
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'subcategories',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    transformation: [{ width: 500, height: 500, crop: 'limit' }]
+  }
 });
 
 const upload = multer({ storage });
@@ -29,16 +21,16 @@ const upload = multer({ storage });
 // POST /api/subcategories
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, categoryId } = req.body;
     const file = req.file;
 
-    if (!name || !file) {
-      return res.status(400).json({ message: 'Name and image are required.' });
+    if (!name || !categoryId || !file) {
+      return res.status(400).json({ message: 'Name, categoryId, and image are required.' });
     }
 
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/subcategories/${file.filename}`;
+    const imageUrl = file.path;
 
-    const subcategory = new Subcategory({ name, imageUrl });
+    const subcategory = new Subcategory({ name, imageUrl, categoryId });
     await subcategory.save();
 
     res.status(201).json(subcategory);
@@ -51,10 +43,10 @@ router.post('/', upload.single('image'), async (req, res) => {
 // GET /api/subcategories
 router.get('/', async (req, res) => {
   try {
-    const subcategories = await Subcategory.find();
+    const subcategories = await Subcategory.find().populate('categoryId', 'name'); // optional: populate category name
     res.json(subcategories);
   } catch (err) {
-    console.error("Error fetching categories:", err);
+    console.error("Error fetching subcategories:", err);
     res.status(500).json({ message: 'Server error' });
   }
 });
