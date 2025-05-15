@@ -5,16 +5,16 @@ import { v4 as uuid } from "uuid";
 const router = express.Router();
 
 router.post('/add', async (req, res) => {
-  const { price } = req.body;
+  const { name } = req.body;
    try{
-        const title=await Price.findOne({ price: price })
+        const title=await Price.findOne({ name: name })
        
         if(title){
             res.json("exist")
         }
         else{
           const newTitle = new Price({
-            price,
+            name,
             price_uuid: uuid()
         });
         await newTitle.save(); 
@@ -34,7 +34,7 @@ router.post('/add', async (req, res) => {
       let data = await Price.find({});
   
       if (data.length)
-        res.json({ success: true, result: data.filter((a) => a.price) });
+        res.json({ success: true, result: data.filter((a) => a.name) });
       else res.json({ success: false, message: "Price Not found" });
     } catch (err) {
       console.error("Error fetching Price:", err);

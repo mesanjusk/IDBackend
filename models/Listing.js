@@ -11,6 +11,9 @@ const listingSchema = new mongoose.Schema({
   seoTitle: String,
   seoDescription: String,
   seoKeywords: String,
+  discount: Number,
+  MOQ: Number,
+  Description: String,
   images: [String], 
   createdAt: {
     type: Date,
