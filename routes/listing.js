@@ -19,10 +19,7 @@ const upload = multer({ storage });
 router.post('/', upload.array('images', 10), async (req, res) => {
 
   try {
-      if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: 'No images uploaded' });
-    }
-    console.log('Uploaded files:', req.files);
+    
     const { title, category, subcategory, price, instagramUrl, size, religions, 
       seoTitle, seoDescription, seoKeywords, discount, MOQ, Description,
   favorite } = req.body;
@@ -64,6 +61,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/favorite', async (req, res) => {
+  try {
+    const query = {};
+
+    if (req.query.favorite === '1') {
+      query.favorite = '1';
+    }
+
+    const listings = await Listing.find(query);
+    res.status(200).json(listings);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 // Get a single listing by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -76,5 +88,7 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 export default router;
