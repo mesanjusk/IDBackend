@@ -23,7 +23,9 @@ router.post('/', upload.array('images', 10), async (req, res) => {
       return res.status(400).json({ error: 'No images uploaded' });
     }
     console.log('Uploaded files:', req.files);
-    const { title, category, subcategory, price, instagramUrl, size, religions, seoTitle, seoDescription, seoKeywords } = req.body;
+    const { title, category, subcategory, price, instagramUrl, size, religions, 
+      seoTitle, seoDescription, seoKeywords, discount, MOQ, Description,
+  favorite } = req.body;
 
     const imageUrls = req.files.map(file => file.path); 
 
@@ -38,6 +40,10 @@ router.post('/', upload.array('images', 10), async (req, res) => {
       seoTitle,
       seoDescription,
       seoKeywords,
+      discount, 
+      MOQ, 
+      Description,
+      favorite,
       images: imageUrls,
     });
 

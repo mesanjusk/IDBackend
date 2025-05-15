@@ -17,6 +17,7 @@ import religionRoutes from './routes/religionRoutes.js';
 import seotRoutes from './routes/seotitleRoutes.js';
 import seodRoutes from './routes/seodesRoutes.js';
 import seokRoutes from './routes/seokeywordRoutes.js';
+import bannerRoutes from './routes/bannerRoutes.js';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use('/api/seots', seotRoutes);
 app.use('/api/seods', seodRoutes);
 app.use('/api/seoks', seokRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/banners', bannerRoutes);
 
 // ✅ Health check
 app.get('/api/ping', (req, res) => {

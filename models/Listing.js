@@ -14,6 +14,7 @@ const listingSchema = new mongoose.Schema({
   discount: Number,
   MOQ: Number,
   Description: String,
+  favorite: Number,
   images: [String], 
   createdAt: {
     type: Date,
