@@ -89,6 +89,32 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/listings/:id - Delete a listing
+router.delete('/:id', async (req, res) => {
+  try {
+    await Listing.findByIdAndDelete(req.params.id);
+    res.json({ message: 'List deleted' });
+  } catch (err) {
+    console.error('Error deleting list:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/listings/:id - Update listing name
+router.put('/:id', async (req, res) => {
+  try {
+    const { title } = req.body;
+    const listing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      { title },
+      { new: true }
+    );
+    res.json(listing);
+  } catch (err) {
+    console.error('Error updating listing:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 export default router;
