@@ -18,6 +18,7 @@ import seotRoutes from './routes/seotitleRoutes.js';
 import seodRoutes from './routes/seodesRoutes.js';
 import seokRoutes from './routes/seokeywordRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
+import configurationRoutes from './routes/configurationRoutes.js';
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use('/api/seods', seodRoutes);
 app.use('/api/seoks', seokRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/banners', bannerRoutes);
+app.use('/api/confi', configurationRoutes);
 
 // ✅ Health check
 app.get('/api/ping', (req, res) => {

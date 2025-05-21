@@ -3,6 +3,7 @@ import multer from 'multer';
 import cloudinary from '../utils/cloudinary.js';
 import Listing from '../models/Listing.js';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import Subcategory from '../models/Subcategory.js';
 
 const router = express.Router();
 
@@ -76,6 +77,24 @@ router.get('/favorite', async (req, res) => {
   }
 });
 
+router.get('/sub', async (req, res) => {
+  try {
+    const { subcategory } = req.query;
+
+    if (!subcategory) {
+      return res.status(400).json({ error: "Missing subcategory" });
+    }
+
+    const listings = await Listing.find({ subcategory });
+
+    res.json(listings);
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+
 // Get a single listing by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -115,6 +134,7 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 export default router;
