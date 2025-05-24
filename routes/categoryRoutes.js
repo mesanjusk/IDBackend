@@ -5,6 +5,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../utils/cloudinary.js';
 import Category from '../models/Category.js';
 import Listing from '../models/Listing.js';
+import { v4 as uuid } from "uuid";
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     const imageUrl = file.path;
 
-    const category = new Category({ name, imageUrl });
+    const category = new Category({ name, imageUrl, category_uuid: uuid() });
     await category.save();
 
     res.status(201).json(category);

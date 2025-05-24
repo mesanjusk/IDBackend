@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const listingSchema = new mongoose.Schema({
+  listing_uuid: String,
   title: String,
   category: String,
   subcategory: String,

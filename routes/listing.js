@@ -3,7 +3,7 @@ import multer from 'multer';
 import cloudinary from '../utils/cloudinary.js';
 import Listing from '../models/Listing.js';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import Subcategory from '../models/Subcategory.js';
+import { v4 as uuid } from "uuid";
 
 const router = express.Router();
 
@@ -28,6 +28,7 @@ router.post('/', upload.array('images', 10), async (req, res) => {
     const imageUrls = req.files.map(file => file.path); 
 
     const newListing = new Listing({
+      listing_uuid: uuid(),
       title,
       category,
       subcategory,

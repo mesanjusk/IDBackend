@@ -31,7 +31,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     const imageUrl = file.path;
 
-    const banner = new Banner({ name, imageUrl });
+    const banner = new Banner({ name, imageUrl, banner_uuid: uuid() });
     await banner.save();
 
     res.status(201).json(banner);
