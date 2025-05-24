@@ -4,6 +4,8 @@ import cloudinary from '../utils/cloudinary.js';
 import Listing from '../models/Listing.js';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v4 as uuid } from "uuid";
+import Category from '../models/Category.js';
+import Subcategory from '../models/Subcategory.js';
 
 const router = express.Router();
 
@@ -27,11 +29,27 @@ router.post('/', upload.array('images', 10), async (req, res) => {
 
     const imageUrls = req.files.map(file => file.path); 
 
+    const categoryDoc = await Category.findOne({
+      $or: [{ name: category }, { category_uuid: category }]
+    });
+
+    if (!categoryDoc) {
+      return res.status(400).json({ message: 'Invalid category' });
+    }
+
+     const subcategoryDoc = await Subcategory.findOne({
+      $or: [{ name: subcategory }, { subcategory_uuid: subcategory }]
+    });
+
+    if (!subcategoryDoc) {
+      return res.status(400).json({ message: 'Invalid subcategory' });
+    }
+
     const newListing = new Listing({
       listing_uuid: uuid(),
       title,
-      category,
-      subcategory,
+      category: categoryDoc.category_uuid,
+      subcategory: subcategoryDoc.subcategory_uuid,
       price,
       instagramUrl,
       size,
