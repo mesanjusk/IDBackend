@@ -97,13 +97,7 @@ router.put('/:id', async (req, res) => {
 
     const updatedData = {};
     if (name) updatedData.name = name;
-     if (categoryId) {
-      const category = await Category.findOne({ category_uuid: categoryId });
-      if (!category) {
-        return res.status(400).json({ message: 'Invalid category UUID.' });
-      }
-      updatedData.categoryId = category.category_uuid;
-    }
+    if (categoryId) updatedData.categoryId = categoryId;
 
     const subcategory = await Subcategory.findByIdAndUpdate(
       req.params.id,

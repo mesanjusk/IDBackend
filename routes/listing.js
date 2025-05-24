@@ -74,13 +74,9 @@ router.post('/', upload.array('images', 10), async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-     const listing = await Listing.findOne({ listing_uuid: req.params.id });
-     if (!listing) {
-      return res.status(404).json({ error: "Listing not found" });
-    }
-    res.status(200).json(listing);
+    const listings = await Listing.find();
+    res.status(200).json(listings);
   } catch (err) {
-    console.error("Error fetching listing:", err);
     res.status(500).json({ error: err.message });
   }
 });
