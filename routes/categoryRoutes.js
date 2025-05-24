@@ -4,6 +4,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../utils/cloudinary.js';
 import Category from '../models/Category.js';
+import Listing from '../models/Listing.js';
 
 const router = express.Router();
 
@@ -41,42 +42,77 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// GET /api/categories - Fetch all categories
+// GET all categories with usage status
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find();
-    res.json(categories);
+    const listings = await Listing.find({}, 'category');
+
+    const usedCategoryNames = new Set(listings.map((l) => l.category));
+
+    const categoriesWithUsage = categories.map((cat) => ({
+      ...cat._doc,
+      isUsed: usedCategoryNames.has(cat.name),
+    }));
+
+    res.json(categoriesWithUsage);
   } catch (err) {
     console.error('Error fetching categories:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// DELETE /api/categories/:id - Delete a category
+
+// DELETE category only if not used
 router.delete('/:id', async (req, res) => {
   try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    const isUsed = await Listing.exists({ category: category.name });
+    if (isUsed) {
+      return res.status(400).json({ message: 'Category is in use and cannot be deleted.' });
+    }
+
     await Category.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Category deleted' });
+    res.json({ message: 'Category deleted successfully' });
   } catch (err) {
-    console.error('Error deleting category:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Delete error:', err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// PUT /api/categories/:id - Update category name
-router.put('/:id', async (req, res) => {
+
+// PUT /api/categories/:id - Update category name and/or image
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const { name } = req.body;
+    const file = req.file;
+
+    const updateData = { name };
+
+    if (file) {
+      updateData.imageUrl = file.path;
+    }
+
     const category = await Category.findByIdAndUpdate(
       req.params.id,
-      { name },
+      updateData,
       { new: true }
     );
+
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
     res.json(category);
   } catch (err) {
     console.error('Error updating category:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 export default router;

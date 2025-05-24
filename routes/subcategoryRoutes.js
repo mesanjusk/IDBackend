@@ -4,6 +4,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../utils/cloudinary.js';
 import Subcategory from '../models/Subcategory.js';
+import Listing from '../models/Listing.js';
 
 const router = express.Router();
 
@@ -47,7 +48,14 @@ router.post('/', upload.single('image'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const subcategories = await Subcategory.find().populate('categoryId', 'name');
-    res.json(subcategories);
+    const listings = await Listing.find({}, 'subcategory');
+     const usedSubcategoryNames = new Set(listings.map((l) => l.subcategory));
+
+    const subcategoriesWithUsage = subcategories.map((cat) => ({
+      ...cat._doc,
+      isUsed: usedSubcategoryNames.has(cat.name),
+    }));
+    res.json(subcategoriesWithUsage);
   } catch (err) {
     console.error('Error fetching subcategories:', err);
     res.status(500).json({ message: 'Server error' });
@@ -57,8 +65,18 @@ router.get('/', async (req, res) => {
 // DELETE /api/subcategories/:id - Delete subcategory
 router.delete('/:id', async (req, res) => {
   try {
-    await Subcategory.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Subcategory deleted' });
+   const subcategory = await Subcategory.findById(req.params.id);
+       if (!subcategory) {
+         return res.status(404).json({ message: 'Subcategory not found' });
+       }
+   
+       const isUsed = await Listing.exists({ subcategory: subcategory.name });
+       if (isUsed) {
+         return res.status(400).json({ message: 'Subcategory is in use and cannot be deleted.' });
+       }
+   
+       await Subcategory.findByIdAndDelete(req.params.id);
+       res.json({ message: 'Subcategory deleted successfully' });
   } catch (err) {
     console.error('Error deleting subcategory:', err);
     res.status(500).json({ message: 'Server error' });
