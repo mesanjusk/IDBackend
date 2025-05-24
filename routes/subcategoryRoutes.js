@@ -5,6 +5,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../utils/cloudinary.js';
 import Subcategory from '../models/Subcategory.js';
 import Listing from '../models/Listing.js';
+import Category from '../models/Category.js';
 import { v4 as uuid } from "uuid";
 
 const router = express.Router();
@@ -33,9 +34,14 @@ router.post('/', upload.single('image'), async (req, res) => {
         .json({ message: 'Name, categoryId, and image are required.' });
     }
 
+     const category = await Category.findOne({ category_uuid: categoryId });
+    if (!category) {
+      return res.status(400).json({ message: 'Invalid category UUID.' });
+    }
+
     const imageUrl = file.path;
 
-    const subcategory = new Subcategory({ name, imageUrl, categoryId, subcategory_uuid: uuid() });
+    const subcategory = new Subcategory({ name, imageUrl, categoryId: category.category_uuid, subcategory_uuid: uuid() });
     await subcategory.save();
 
     res.status(201).json(subcategory);
@@ -91,7 +97,13 @@ router.put('/:id', async (req, res) => {
 
     const updatedData = {};
     if (name) updatedData.name = name;
-    if (categoryId) updatedData.categoryId = categoryId;
+     if (categoryId) {
+      const category = await Category.findOne({ category_uuid: categoryId });
+      if (!category) {
+        return res.status(400).json({ message: 'Invalid category UUID.' });
+      }
+      updatedData.categoryId = category.category_uuid;
+    }
 
     const subcategory = await Subcategory.findByIdAndUpdate(
       req.params.id,
