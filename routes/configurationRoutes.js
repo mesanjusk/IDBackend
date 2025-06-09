@@ -21,7 +21,7 @@ const upload = multer({ storage });
 
 router.post("/add", upload.single('logo'), async (req, res) => {
   try {
-    const { name, email, phone, address } = req.body;
+    const { name, email, phone, address, fb, insta, twitter, linkedIn } = req.body;
     const file = req.file;
 
     if (!file) return res.status(400).json("Logo image is required.");
@@ -40,6 +40,10 @@ router.post("/add", upload.single('logo'), async (req, res) => {
         phone,
         address,
         Confi_uuid: uuid(),
+        fb, 
+        insta, 
+        twitter, 
+        linkedIn
       });
       await newConfi.save();
       res.json("notexist");
@@ -90,5 +94,34 @@ router.get('/:id', async (req, res) => {
       });
   }
 });
+
+router.put('/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { name, email, phone, address, fb, insta, twitter, linkedIn } = req.body;
+    const file = req.file;
+
+    const updateData = { name, email, phone, address, fb, insta, twitter, linkedIn  };
+
+    if (file) {
+      updateData.logo = file.path;
+    }
+
+    const config = await Configuration.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!config) {
+      return res.status(404).json({ message: 'Config not found' });
+    }
+
+    res.json(config);
+  } catch (err) {
+    console.error('Error updating config:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
   export default router;
