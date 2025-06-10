@@ -138,22 +138,43 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/listings/:id - Update listing name
-router.put('/:id', async (req, res) => {
+// PUT: Update a listing
+router.put('/:id', upload.array('images'), async (req, res) => {
   try {
-    const { title } = req.body;
-    const listing = await Listing.findByIdAndUpdate(
-      req.params.id,
-      { title },
-      { new: true }
-    );
-    res.json(listing);
+    const {
+      title,
+      category,
+      subcategory,
+      price,
+      religions,
+      favorite,
+      existingImages,
+    } = req.body;
+
+    const existing = existingImages ? JSON.parse(existingImages) : [];
+    const uploaded = req.files.map((file) => file.path);
+    const finalImages = [...existing, ...uploaded];
+
+    const updatedData = {
+      title,
+      category,
+      subcategory,
+      price,
+      religions,
+      favorite,
+      images: finalImages,
+    };
+
+    const updatedListing = await Listing.findByIdAndUpdate(req.params.id, updatedData, {
+      new: true,
+    });
+
+    res.json(updatedListing);
   } catch (err) {
     console.error('Error updating listing:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 
 export default router;
