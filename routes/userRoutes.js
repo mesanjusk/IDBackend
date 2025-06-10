@@ -71,27 +71,39 @@ router.post("/addUser", async (req, res) => {
     }
   });
 
-  router.put("/updateUser/:id", async (req, res) => {
-    const { id } = req.params;
-    const { User_name, Mobile_number } = req.body;
+ router.put("/updateUser/:id", async (req, res) => {
+  const { id } = req.params;
+  const { User_name, Mobile_number } = req.body;
 
-    try {
-        const user = await Users.findByIdAndUpdate(id, {
-            User_name,
-            Password,
-            Mobile_number,
-        }, { new: true }); 
+  try {
+    const updatedUser = await Users.findOneAndUpdate(
+      { _id: id },
+      { User_name, Mobile_number },
+      { new: true }
+    );
 
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        res.json({ success: true, result: user });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server error" });
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      message: 'User updated successfully',
+      result: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user',
+      error: error.message,
+    });
+  }
 });
+
 
 
 router.get('/:id', async (req, res) => {
