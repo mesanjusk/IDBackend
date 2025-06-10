@@ -47,16 +47,15 @@ router.post('/', upload.single('image'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find();
-    const listings = await Listing.find({}, 'category');
+    const listings = await Listing.find({}, 'category'); 
 
-    const usedCategoryNames = new Set(listings.map((l) => l.category));
+    const usedCategoryUuids = new Set(listings.map((l) => l.category));
 
-    const categoriesWithUsage = categories.map((cat) => ({
-      ...cat._doc,
-      isUsed: usedCategoryNames.has(cat.name),
-    }));
+    const filtered = categories.filter(cat =>
+      usedCategoryUuids.has(cat.category_uuid)
+    );
 
-    res.json(categoriesWithUsage);
+    res.json(filtered);
   } catch (err) {
     console.error('Error fetching categories:', err);
     res.status(500).json({ message: 'Internal server error' });
