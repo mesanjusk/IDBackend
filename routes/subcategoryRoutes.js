@@ -90,22 +90,27 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/subcategories/:id - Update subcategory name or categoryId
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const { name, categoryId } = req.body;
+    const file = req.file;
 
     const updatedData = {};
     if (name) updatedData.name = name;
     if (categoryId) updatedData.categoryId = categoryId;
+    if (file) updatedData.imageUrl = file.path; 
 
-    const subcategory = await Subcategory.findByIdAndUpdate(
+    const updatedSubcategory = await Subcategory.findByIdAndUpdate(
       req.params.id,
       updatedData,
       { new: true }
-    ).populate('categoryId', 'name');
+    );
+    const category = await Category.findOne({ category_uuid: updatedSubcategory.categoryId });
 
-    res.json(subcategory);
+    res.json({
+      ...updatedSubcategory.toObject(),
+      category: category ? { name: category.name, _id: category._id } : null,
+    });
   } catch (err) {
     console.error('Error updating subcategory:', err);
     res.status(500).json({ message: 'Server error' });
