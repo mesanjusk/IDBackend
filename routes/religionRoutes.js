@@ -33,21 +33,30 @@ router.post('/add', async (req, res) => {
 router.get("/GetReligionList", async (req, res) => {
   try {
     const religions = await Religion.find({});
-    const listings = await Listing.find({}, 'religions');
+    const listings = await Listing.find({}, "religions");
 
-    const usedReligionUuids = new Set(listings.map((l) => l.religions));
+    const usedReligionUuids = new Set();
+
+    listings.forEach((l) => {
+      if (Array.isArray(l.religions)) {
+        l.religions.forEach((r) => usedReligionUuids.add(r));
+      } else if (typeof l.religions === "string") {
+        usedReligionUuids.add(l.religions);
+      }
+    });
 
     const religionsWithUsage = religions.map((rel) => ({
       ...rel._doc,
       isUsed: usedReligionUuids.has(rel.religion_uuid),
     }));
 
-    res.json(religionsWithUsage);
+    res.json({ result: religionsWithUsage });
   } catch (err) {
     console.error("Error fetching religion list:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 
 router.get('/:id', async (req, res) => {

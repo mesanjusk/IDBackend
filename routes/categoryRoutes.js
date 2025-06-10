@@ -44,25 +44,44 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // GET all categories with usage status
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find();
-    const listings = await Listing.find({}, 'category'); 
+    const categories = await Category.find({});
+    const listings = await Listing.find({});
 
-    const usedCategoryUuids = new Set(listings.map((l) => l.category));
+    const usedCategorySet = new Set(listings.map(l => l.category)); 
+    const usedCategories = categories.filter(cat =>
 
-    const categoriesWithUsage = categories.map((cat) => ({
-      ...cat._doc,
-      isUsed: usedCategoryUuids.has(cat.category_uuid),
-    }));
+      usedCategorySet.has(cat.category_uuid)
+    );
+    res.json(usedCategories);
 
-    res.json(categoriesWithUsage);
   } catch (err) {
-    console.error('Error fetching categories:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching used categories:", err);
+    res.status(500).json({ error: "Failed to load categories." });
   }
+
 });
 
+// GET /api/categories/with-usage
+router.get("/with-usage", async (req, res) => {
+  try {
+    const listings = await Listing.find({}, "category"); 
+    const usedCategoryUUIDs = listings.map(l => l.category);
+
+    const categories = await Category.find();
+
+    const enriched = categories.map(cat => ({
+      ...cat._doc,
+      isUsed: usedCategoryUUIDs.includes(cat.category_uuid),
+    }));
+
+    res.json(enriched);
+  } catch (err) {
+    console.error("Error fetching categories with usage:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 
 // DELETE category only if not used
