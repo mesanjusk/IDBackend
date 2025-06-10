@@ -44,6 +44,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // GET all categories with usage status
+// GET all categories with usage status
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find();
@@ -51,16 +52,18 @@ router.get('/', async (req, res) => {
 
     const usedCategoryUuids = new Set(listings.map((l) => l.category));
 
-    const filtered = categories.filter(cat =>
-      usedCategoryUuids.has(cat.category_uuid)
-    );
+    const categoriesWithUsage = categories.map((cat) => ({
+      ...cat._doc,
+      isUsed: usedCategoryUuids.has(cat.category_uuid),
+    }));
 
-    res.json(filtered);
+    res.json(categoriesWithUsage);
   } catch (err) {
     console.error('Error fetching categories:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 // DELETE category only if not used
