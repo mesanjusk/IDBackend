@@ -1,6 +1,7 @@
 import express from 'express';
 import Religion from '../models/Religion.js';
 import { v4 as uuid } from "uuid";
+import Listing from '../models/Listing.js';
 
 const router = express.Router();
 
@@ -29,18 +30,24 @@ router.post('/add', async (req, res) => {
 
 });
 
- router.get("/GetReligionList", async (req, res) => {
-    try {
-      let data = await Religion.find({});
-  
-      if (data.length)
-        res.json({ success: true, result: data.filter((a) => a.name) });
-      else res.json({ success: false, message: "Religion Not found" });
-    } catch (err) {
-      console.error("Error fetching religion:", err);
-        res.status(500).json({ success: false, message: err });
-    }
-  });
+router.get("/GetReligionList", async (req, res) => {
+  try {
+    const religions = await Religion.find({});
+    const listings = await Listing.find({});
+
+   const usedReligionSet = new Set(listings.map(l => l.religions));
+
+     const result = religions.map(rel => ({
+      ...rel._doc,
+      isUsed: usedReligionSet.has(rel._id.toString()),
+    }));
+
+    res.json({ success: true, result });
+  } catch (err) {
+    console.error("Error fetching religion list:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params; 
