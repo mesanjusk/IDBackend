@@ -123,5 +123,14 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    await Configuration.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Config deleted' });
+  } catch (err) {
+    console.error('Error deleting config:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
   export default router;
