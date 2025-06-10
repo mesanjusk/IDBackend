@@ -44,7 +44,6 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // GET all categories with usage status
-// GET all categories with usage status
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find();
