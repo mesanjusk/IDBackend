@@ -34,10 +34,19 @@ router.get("/GetReligionList", async (req, res) => {
   try {
     const religions = await Religion.find({});
     const listings = await Listing.find({});
+    
+    const usedReligionSet = new Set();
 
-   const usedReligionSet = new Set(listings.map(l => l.religions));
+    listings.forEach(listing => {
+      const relField = listing.religions;
+      if (Array.isArray(relField)) {
+        relField.forEach(r => usedReligionSet.add(r));
+      } else if (typeof relField === 'string') {
+        usedReligionSet.add(relField);
+      }
+    });
 
-     const result = religions.map(rel => ({
+    const result = religions.map(rel => ({
       ...rel._doc,
       isUsed: usedReligionSet.has(rel._id.toString()),
     }));
@@ -48,6 +57,7 @@ router.get("/GetReligionList", async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params; 
