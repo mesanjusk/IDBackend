@@ -121,39 +121,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.put('/update/:id', async (req, res) => {
-const { id } = req.params;  
-const { User_name, Mobile_number } = req.body;
-
-try {
-  const updatedUser = await Users.findOneAndUpdate(
-    { _id: id }, 
-    { User_name, Mobile_number },
-    { new: true }  
-  );
-
-  if (!updatedUser) {
-    return res.status(404).json({
-      success: false,
-      message: 'User not found',
-    });
-  }
-
-  res.status(200).json({
-    success: true,
-    message: 'User updated successfully',
-    result: updatedUser,
-  });
-} catch (error) {
-  console.error('Error updating user:', error);
-  res.status(500).json({
-    success: false,
-    message: 'Error updating user',
-    error: error.message,
-  });
-}
-});
-
 router.get('/getUserByName/:username', async (req, res) => {
   const { username } = req.params;
 
